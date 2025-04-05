@@ -1,0 +1,16 @@
+{
+  "name": "genia-platform",
+  "version": "1.0.0",
+  "description": "Plataforma GENIA con IA para automatización de negocios digitales",
+  "main": "index.js",
+  "scripts": {
+    "start": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "install-deps": "npm install && cd frontend && npm install"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^10.0.0"
+  }
+}
