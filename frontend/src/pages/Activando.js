@@ -11,14 +11,16 @@ const Activando = () => {
     if (correo) {
       // Guardar el correo en localStorage
       localStorage.setItem("genia_user_email", correo);
-    }
 
-    // Si necesitas disparar Make desde aquí, puedes descomentar esto:
-    // fetch("https://hook.make.com/tu_webhook", {
-    // method: "POST",
-    // body: JSON.stringify({ correo }),
-    // headers: { "Content-Type": "application/json" },
-    // });
+      // Disparar Make automáticamente
+      fetch("https://hook.eu2.make.com/mgmz3k8mvpw9jts58koqwjbyvxpv2whq", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ correo }),
+      });
+    }
 
     // Redirige automáticamente al dashboard
     setTimeout(() => {
