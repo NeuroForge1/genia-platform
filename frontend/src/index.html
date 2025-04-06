@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-950 text-white font-sans">
+<div class="flex min-h-screen">
+  <!-- Sidebar / Menú lateral -->
+  <aside class="w-64 bg-gray-900 p-6 space-y-4">
+    <h2 class="text-2xl font-bold text-teal-400">GENIA</h2>
+    <div id="userInfo" class="py-3 border-b border-gray-800">
+      <p id="userName" class="font-medium">Cargando...</p>
+      <p id="userPlan" class="text-sm text-teal-400">Plan: Cargando...</p>
+      <p id="userCredits" class="text-sm text-gray-400">Créditos: Cargando...</p>
+    </div>
+    <nav class="space-y-2">
+      <a href="/dashboard" class="block text-white hover:text-teal-400 py-1">Inicio</a>
+      <a href="/contenido" class="block text-gray-300 hover:text-white py-1">Contenido IA</a>
+      <a href="/embudos" class="block text-gray-300 hover:text-white py-1">Embudos IA</a>
+      <a href="/automatizaciones" class="block text-gray-300 hover:text-white py-1">Automatizaciones</a>
+      <a href="/metricas" class="block text-gray-300 hover:text-white py-1">Métricas</a>
+      <a href="/planes" class="block text-gray-300 hover:text-white py-1">Planes y Créditos</a>
+      <a href="/referidos" class="block text-gray-300 hover:text-white py-1">Referidos</a>
+    </nav>
+    <div class="pt-4 mt-4 border-t border-gray-800">
+      <button id="logoutButton" class="text-gray-400 hover:text-white">Cerrar sesión</button>
+    </div>
+  </aside>
+  
+  <!-- Contenido principal -->
+  <main class="flex-1 p-10 space-y-6">
+    <h1 class="text-3xl font-bold text-teal-400" id="mainGreeting">Hola</h1>
+    
+    <!-- Tarjetas de tareas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold">Seguir leads</h3>
+        <p class="text-gray-400 text-sm mt-2">Automatiza el seguimiento de tus leads con mensajes personalizados.</p>
+        <button class="bg-teal-500 px-4 py-2 mt-4 rounded-lg make-action" data-action="seguir_leads">Automatizar</button>
+      </div>
+      
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold">Crear contenido</h3>
+        <p class="text-gray-400 text-sm mt-2">Genera contenido para redes sociales con IA.</p>
+        <button class="bg-teal-500 px-4 py-2 mt-4 rounded-lg make-action" data-action="crear_contenido">Automatizar</button>
+      </div>
+      
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h3 class="text-xl font-semibold">Embudo de ventas</h3>
+        <p class="text-gray-400 text-sm mt-2">Crea un embudo de ventas completo para tu producto.</p>
+        <button class="bg-teal-500 px-4 py-2 mt-4 rounded-lg make-action" data-action="crear_embudo">Automatizar</button>
+      </div>
+    </div>
+    
+    <!-- Botón "Que GENIA lo haga por mí" -->
+    <div class="mt-10 text-center">
+      <button id="geniaAction" class="bg-teal-400 hover:bg-teal-500 text-gray-900 font-bold px-8 py-4 rounded-2xl shadow-lg text-lg transition-all">
+        Que GENIA lo haga por mí
+      </button>
+      <p class="text-gray-400 mt-2 text-sm">Deja que GENIA automatice todo por ti</p>
+    </div>
+  </main>
+</div>
+
+<!-- Popup de créditos bajos (oculto por defecto) -->
+<div id="lowCreditsPopup" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+  <div class="bg-gray-900 p-6 rounded-2xl max-w-md w-full text-white text-center border border-teal-400">
+    <h2 class="text-2xl font-bold text-teal-400">¡Te quedan pocos créditos!</h2>
+    <p class="text-gray-300 my-3">Necesitas más créditos para seguir utilizando GENIA al máximo.</p>
+    <button id="buyCreditsButton" class="bg-teal-500 px-6 py-3 rounded-xl mt-4">Comprar más créditos</button>
+    <button id="closePopupButton" class="block mx-auto mt-3 text-gray-400 hover:text-white">Cerrar</button>
+  </div>
+</div>
+
+<script>
+  // Configuración de Supabase
+  const supabaseUrl = 'SUPABASE_URL';
+  const supabaseKey = 'SUPABASE_KEY';
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  
+  // Verificar si el usuario está autenticado
+  document.addEventListener('DOMContentLoaded', async function() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    if (!user) {
+      // Si no hay usuario autenticado, redirigir al login
+      window.location.href = '/login';
+      return;
+    }
+    
+    try {
+      // Obtener datos del usuario desde Supabase
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('nombre, plan, creditos')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      // Actualizar información del usuario en la interfaz
+      if (data) {
+        document.getElementById('userName').textContent = data.nombre;
+        document.getElementById('userPlan').textContent = `Plan: ${data.plan}`;
+        document.getElementById('userCredits').textContent = `Créditos: ${data.creditos}`;
+        document.getElementById('mainGreeting').textContent = `Hola, ${data.nombre}`;
+        
+        // Mostrar popup de créditos bajos si es necesario
+        if (data.creditos < 10) {
+          document.getElementById('lowCreditsPopup').classList.remove('hidden');
+        }
+      }
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    }
+  });
+  
+  // Manejar cierre de sesión
+  document.getElementById('logoutButton').addEventListener('click', async function() {
+    try {
+      await supabase.auth.signOut();
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  });
+  
+  // Manejar acciones de Make
+  document.querySelectorAll('.make-action').forEach(button => {
+    button.addEventListener('click', async function() {
+      const action = this.getAttribute('data-action');
+      const user = JSON.parse(localStorage.getItem('user'));
+      
+      try {
+        // Verificar créditos del usuario
+        const { data, error } = await supabase
+          .from('usuarios')
+          .select('creditos')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) throw error;
+        
+        if (data.creditos < 1) {
+          document.getElementById('lowCreditsPopup').classList.remove('hidden');
+          return;
+        }
+        
+        // Enviar solicitud a Make (simulado)
+        console.log(`Enviando acción "${action}" a Make`);
+        
+        // Actualizar créditos del usuario
+        const { error: updateError } = await supabase
+          .from('usuarios')
+          .update({ creditos: data.creditos - 1 })
+          .eq('user_id', user.id);
+        
+        if (updateError) throw updateError;
+        
+        // Actualizar contador de créditos en la interfaz
+        document.getElementById('userCredits').textContent = `Créditos: ${data.creditos - 1}`;
+        
+        alert(`Acción "${action}" iniciada correctamente`);
+      } catch (error) {
+        console.error('Error al ejecutar acción:', error);
+        alert('Error al ejecutar la acción. Inténtalo de nuevo.');
+      }
+    });
+  });
+  
+  // Manejar botón "Que GENIA lo haga por mí"
+  document.getElementById('geniaAction').addEventListener('click', async function() {
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    try {
+      // Verificar créditos del usuario
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('creditos')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) throw error;
+      
+      if (data.creditos < 3) {
+        document.getElementById('lowCreditsPopup').classList.remove('hidden');
+        return;
+      }
+      
+      // Enviar solicitud a Make (simulado)
+      console.log('Enviando acción "genia_completo" a Make');
+      
+      // Actualizar créditos del usuario
+      const { error: updateError } = await supabase
+        .from('usuarios')
+        .update({ creditos: data.creditos - 3 })
+        .eq('user_id', user.id);
+      
+      if (updateError) throw updateError;
+      
+      // Actualizar contador de créditos en la interfaz
+      document.getElementById('userCredits').textContent = `Créditos: ${data.creditos - 3}`;
+      
+      alert('GENIA está trabajando en automatizar todo para ti. Recibirás una notificación cuando esté listo.');
+    } catch (error) {
+      console.error('Error al ejecutar acción completa:', error);
+      alert('Error al ejecutar la acción. Inténtalo de nuevo.');
+    }
+  });
+  
+  // Manejar cierre del popup de créditos bajos
+  document.getElementById('closePopupButton').addEventListener('click', function() {
+    document.getElementById('lowCreditsPopup').classList.add('hidden');
+  });
+  
+  // Manejar botón de compra de créditos
+  document.getElementById('buyCreditsButton').addEventListener('click', function() {
+    window.location.href = '/planes';
+  });
+</script>
+</body>
+</html>
