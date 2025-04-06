@@ -10,48 +10,46 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  
+
   const { register } = useAuth();
   const navigate = useNavigate();
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validaciones básicas
+
     if (!nombre.trim() || !email.trim() || !negocio.trim()) {
       setError('Por favor completa todos los campos obligatorios');
       return;
     }
-    
-    // Validar formato de email
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Por favor ingresa un email válido');
       return;
     }
-    
+
     try {
       setError('');
       setLoading(true);
-      
+
       // Registrar usuario
       const userData = await register(nombre, email, negocio, codigoReferido || null);
-      
+
       // Mostrar mensaje de éxito
       setSuccess(true);
-      
-      // Redirigir al dashboard después de 2 segundos
+
+      // Redirigir a la página de activación
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(`/activando?correo=${email}`);
       }, 2000);
-      
+
     } catch (err) {
       setError(err.response?.data?.error || 'Error al registrar usuario');
     } finally {
       setLoading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-genia-secondary flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -82,7 +80,7 @@ const Register = () => {
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-green-800">Registro exitoso</h3>
                   <div className="mt-2 text-sm text-green-700">
-                    <p>Tu cuenta ha sido creada correctamente. Serás redirigido al dashboard en unos segundos.</p>
+                    <p>Tu cuenta ha sido creada correctamente. Serás redirigido en unos segundos.</p>
                   </div>
                 </div>
               </div>
@@ -106,73 +104,65 @@ const Register = () => {
                   </div>
                 </div>
               )}
-              
+
               <div>
                 <label htmlFor="nombre" className="block text-sm font-medium text-genia-light">
                   Nombre completo
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="nombre"
-                    name="nombre"
-                    type="text"
-                    required
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    className="input-field w-full"
-                  />
-                </div>
+                <input
+                  id="nombre"
+                  name="nombre"
+                  type="text"
+                  required
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  className="input-field w-full"
+                />
               </div>
 
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-genia-light">
                   Email
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="input-field w-full"
-                  />
-                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-field w-full"
+                />
               </div>
 
               <div>
                 <label htmlFor="negocio" className="block text-sm font-medium text-genia-light">
                   Nombre de tu negocio
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="negocio"
-                    name="negocio"
-                    type="text"
-                    required
-                    value={negocio}
-                    onChange={(e) => setNegocio(e.target.value)}
-                    className="input-field w-full"
-                  />
-                </div>
+                <input
+                  id="negocio"
+                  name="negocio"
+                  type="text"
+                  required
+                  value={negocio}
+                  onChange={(e) => setNegocio(e.target.value)}
+                  className="input-field w-full"
+                />
               </div>
 
               <div>
                 <label htmlFor="codigoReferido" className="block text-sm font-medium text-genia-light">
                   Código de referido (opcional)
                 </label>
-                <div className="mt-1">
-                  <input
-                    id="codigoReferido"
-                    name="codigoReferido"
-                    type="text"
-                    value={codigoReferido}
-                    onChange={(e) => setCodigoReferido(e.target.value)}
-                    className="input-field w-full"
-                  />
-                </div>
+                <input
+                  id="codigoReferido"
+                  name="codigoReferido"
+                  type="text"
+                  value={codigoReferido}
+                  onChange={(e) => setCodigoReferido(e.target.value)}
+                  className="input-field w-full"
+                />
               </div>
 
               <div>
